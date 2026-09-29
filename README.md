@@ -89,7 +89,7 @@ La cuenta de acceso (`username`, hash, roles) es distinta del `User` de negocio 
 - `POST /api/v1/auth/login` con `username` y `password` devuelve un access token de 15 minutos y un refresh token de 7 días.
 - `POST /api/v1/auth/refresh` rota el refresh token. El anterior deja de servir.
 - `POST /api/v1/auth/logout` con `{ "refreshToken" }` revoca ese refresh token y responde 204. Si el token ya no sirve, también responde 204.
-- El resto de la API exige `Authorization: Bearer …`.
+- El resto de la API exige `Authorization: Bearer …`, salvo en el perfil `local`: ahí `app.security.enabled=false` deja los endpoints abiertos. Tests y `prod` lo dejan en `true`.
 - `GET /users?page=0&size=10` responde `content`, `totalElements`, `totalPages`, `number` y `size`.
 - `DELETE /users/{id}`, activar y desactivar exigen rol `ADMIN`.
 
