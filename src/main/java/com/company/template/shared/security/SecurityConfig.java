@@ -1,6 +1,8 @@
 package com.company.template.shared.security;
 
 import com.company.template.repository.AccountRepository;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -17,6 +19,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfigurationSource;
 
+@Slf4j
 @Configuration
 public class SecurityConfig {
 
@@ -38,6 +41,23 @@ public class SecurityConfig {
 	}
 
 	@Bean
+	@ConditionalOnProperty(name = "app.security.enabled", havingValue = "false")
+	SecurityFilterChain openSecurityFilterChain(HttpSecurity http, CorsConfigurationSource corsConfigurationSource)
+			throws Exception {
+		log.warn("app.security.enabled=false: los endpoints responden sin JWT");
+		http
+				.csrf(AbstractHttpConfigurer::disable)
+				.cors(cors -> cors.configurationSource(corsConfigurationSource))
+				.httpBasic(AbstractHttpConfigurer::disable)
+				.formLogin(AbstractHttpConfigurer::disable)
+				.logout(AbstractHttpConfigurer::disable)
+				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+				.authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
+		return http.build();
+	}
+
+	@Bean
+	@ConditionalOnProperty(name = "app.security.enabled", havingValue = "true", matchIfMissing = true)
 	SecurityFilterChain securityFilterChain(
 			HttpSecurity http,
 			AccountRepository accountRepository,
